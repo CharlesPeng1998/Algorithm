@@ -109,5 +109,3 @@ bool DFS(int n)
     //进行到这里说明全部分支搜索无果，返回false
     return false;
 }
-
-
