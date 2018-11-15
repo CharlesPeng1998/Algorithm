@@ -1,98 +1,234 @@
 #include <iostream>
 #include <string>
-#include <stack>
-#include <queue>
 using namespace std;
 
-/***************Stack****************/
+#define TRAVERSE 0
+#define SEARCH 1
+
+enum pointerTag {Link,Thread};
 template<class T>
-class Stack:public stack<T> { //公有继承stack类并改写pop()
+class biThrTree; //Foward declaration
+int count=1;
+
+/*******线索二叉树结点*********/
+template <class T>
+class biThrNode {
+private: //注意修改
+    T data;
+    biThrNode *left,*right;
+    pointerTag lTag,rTag;
+    friend biThrTree<T>;
 public:
-    T pop() {
-        T tmp=stack<T>::top();
-        stack<T>::pop();
-        return tmp;
+    biThrNode() {
+        left=NULL;
+        right=NULL;
+        lTag=Link;
+        rTag=Link;
     }
 };
-/***************Stack****************/
+/*******线索二叉树结点*********/
 
-/****************Queue******************/
+/*********线索二叉树***********/
 template<class T>
-class Queue:public queue<T> { //共有继承queue并改写入队出队操作
+class biThrTree {
+private:
+    biThrNode<T> *root;
 public:
-    T dequeue() {
-        T tmp=queue<T>::front();
-        queue<T>::pop();
-        return tmp;
-    }
-    void enqueue(const T& el) {
-        push(el);
-    }
-};
-/****************Queue******************/
+    void createBiTree(); //建立二叉树
 
-/*************Binary Search Tree**************/
+    void preCreateBiTree(biThrNode<T>* &ptr); //先序建立二叉树（递归实现）
+    void preTreading(biThrNode<T> *ptr,biThrNode<T>* &pre); //先序线索化
+    void preOrderTreading(); //先序线索化
+    void preOrderTraverse(); //先序遍历线索二叉树 There's some problem here!!
+    void display(biThrNode<T> *p,int nLayer); //递归打印二叉树
+    template <class Type>
+    friend void print(biThrTree<Type> btt);
+    void preTraverse(biThrNode<T> *ptr);
+    void Traverse();
+    void inThreading(biThrNode<T> *ptr,biThrNode<T>* &pre); //中序线索化
+    void inOrderTreading(); //中序线索化
+    void InOrderTraverse(int opt); //搜索指定结点的并求其前驱和后继
+    void getPreSucc(biThrNode<T> *targetNode);
+
+};
+template <class T>
+void biThrTree<T>::preTraverse(biThrNode<T> *ptr) {
+    if (ptr) {
+        cout<<ptr->data;
+        if (ptr->lTag==Link)
+            preTraverse(ptr->left);
+        if (ptr->rTag==Link)
+            preTraverse(ptr->right);
+    }
+}
+
 template<class T>
-class BSTNode {
-public:
-    BSTNode() {
-        left=right=0;
+void biThrTree<T>::Traverse() {
+    preTraverse(root->left);
+}
+
+template <class T>
+void biThrTree<T>::preCreateBiTree(biThrNode<T>* &ptr) {
+    char data;
+    if (!(cin>>data)) return;
+    if (data!='#'){
+        ptr=new biThrNode<T>;
+        ptr->data=data;
+        preCreateBiTree(ptr->left);
+        preCreateBiTree(ptr->right);
     }
-    BSTNode(const T &e,BSTNode<T> *l=0, BSTNode<T> *r=0) {
-        el=e;left=l;right=r;
-    }
-    T el;
-    BSTNode<T> *left,*right;
-};
+    else ptr=NULL;
+}
 
 template<class T>
-class BST {
-public:
-    BST() {
-        root=0;
-    }
-    friend void initBST(BST<char> bst);
-protected:
-    BSTNode<T> *root;
-};
+void biThrTree<T>::createBiTree() {
+    preCreateBiTree(root);
+}
 
-
-void initBST(BST<char> bst) {
-    string input;
-    Stack<BSTNode<char>*> nodeStack;
-    cin>>input;
-    if (!input.length()) return; //无输入
-    bst.root=new BSTNode<char>;
-    bst.root->el=input[0];
-    BSTNode<char> *ptr=bst.root;
-    for (int i=1;i<int(input.length());i++) {
-        if (ptr) { //当前结点不为空结点
-            if (input[i]!='#') {
-                ptr->left=new BSTNode<char>;
-                ptr->left->el=input[i];
-                nodeStack.push(ptr);
-                ptr=ptr->left;
-            }
-            else {
-                nodeStack.push(ptr);
-                ptr=ptr->left;
-            }
+template<class T>
+void biThrTree<T>::preTreading(biThrNode<T> *ptr,biThrNode<T>* &pre) {
+    if (ptr) {
+        if (!ptr->left) {
+            ptr->lTag=Thread;
+            ptr->left=pre;
         }
-        else { //当前结点位空结点，从栈中弹出上一个结点
-            ptr=nodeStack.pop();
-            if (input[i]!='#') {
-                ptr->right=new BSTNode<char>;
-                ptr->right->el=input[i];
-                ptr=ptr->right;
-            }
-            else {
-                ptr=ptr->right;
-            }
+        if (pre && !pre->right) {
+            pre->rTag=Thread;
+            pre->right=ptr;
+        }
+        pre=ptr;
+        if (ptr->lTag==Link) preTreading(ptr->left,pre);
+        if (ptr->rTag==Link) preTreading(ptr->right,pre); //这两句的条件很重要
+                                                          //判断是否有子树
+    }
+}
+
+template<class T>
+void biThrTree<T>::preOrderTreading() {
+    biThrNode<T> *pre=0;
+    preTreading(root,pre);
+    pre->rTag=Thread;
+}
+
+template <class T>
+void biThrTree<T>::preOrderTraverse() {
+    biThrNode<T> *ptr=root;
+    while (ptr) {
+        while (ptr->lTag!=Thread) {
+            cout<<ptr->data;
+            ptr=ptr->left;
+        }
+        cout<<ptr->data;
+        ptr=ptr->right;
+    }
+    cout<<endl;
+}
+
+template<class T>
+void biThrTree<T>::inThreading(biThrNode<T> *ptr,biThrNode<T>* &pre) {
+    if (ptr) {
+        inThreading(ptr->left,pre);
+        if (!ptr->left) {
+            ptr->lTag=Thread;
+            ptr->left=pre;
+        }
+        if (!pre->right) {
+            pre->rTag=Thread;
+            pre->right=ptr;
+        }
+        pre=ptr;
+        inThreading(ptr->right,pre);
+    }
+}
+
+template <class T>
+void biThrTree<T>::inOrderTreading() {
+    biThrNode<T> *head=new biThrNode<T>;
+    biThrNode<T> *pre;
+    head->lTag=Link;
+    head->rTag=Thread;
+    head->right=head;
+    if (!root) head->left=head;
+    else {
+        head->left=root;
+        pre=head;
+        inThreading(root,pre);
+        pre->right=head;
+        pre->rTag=Thread;
+        head->right=pre;
+    }
+    root=head;
+}
+
+template<class T>
+void biThrTree<T>::display(biThrNode<T> *p,int nLayer) {
+    int i;
+    //if (p==0) return;
+    if (p->rTag==Link) display(p->right,nLayer+1);
+    for(i=0;i<nLayer;i++)
+        cout<<"     ";
+    cout<<p->data<<p->lTag<<p->rTag<<endl;
+    if (p->lTag==Link) display(p->left,nLayer+1);
+}
+
+template<class Type>
+void print(biThrTree<Type> btt) {
+    //btt.display(btt.root->left,0);
+    btt.display(btt.root,0);
+}
+
+template<class T>
+void biThrTree<T>::InOrderTraverse(int opt) {
+    string inOrderseq;
+    char target;
+    biThrNode<T> *targetNode=NULL;
+    cin>>target;
+    biThrNode<T> *ptr=root->left;
+    while (ptr!=root) {
+        while (ptr->lTag==Link) ptr=ptr->left;
+        inOrderseq+=ptr->data;
+        if (ptr->data==target) targetNode=ptr;
+        while (ptr->rTag==Thread && ptr->right!=root) {
+            ptr=ptr->right;
+            inOrderseq+=ptr->data;
+            if (ptr->data==target) targetNode=ptr;
+        }
+        ptr=ptr->right;
+    }
+    cout<<inOrderseq<<endl;
+
+    if (!targetNode) cout<<"Not found"<<endl;
+    else {
+        if (targetNode->rTag==Thread) {
+            if (targetNode->right!=root)
+                cout<<"succ is "<<targetNode->right->data<<targetNode->right->rTag<<endl;
+            else cout<<"succ is NULL"<<endl;
+        }
+        else {
+            ptr=targetNode->right;
+            while (ptr->lTag==Link) ptr=ptr->left;
+            cout<<"succ is "<<ptr->data<<ptr->rTag<<endl;
+        }
+
+        if (targetNode->lTag==Thread) {
+            if (targetNode->left!=root)
+                cout<<"prev is "<<targetNode->left->data<<targetNode->left->lTag<<endl;
+            else cout<<"prev is NULL"<<endl;
+        }
+        else {
+            ptr=targetNode->left;
+            while (ptr->rTag==Link) ptr=ptr->right;
+            cout<<"prev is "<<ptr->data<<ptr->lTag<<endl;
         }
     }
 }
-/*************Binary Search Tree**************/
+
+/*********线索二叉树***********/
 
 int main() {
-
+    biThrTree<char> BTT;
+    BTT.createBiTree();
+    BTT.inOrderTreading();
+    BTT.InOrderTraverse(TRAVERSE);
+    return 0;
 }

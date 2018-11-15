@@ -47,7 +47,7 @@ public:
     void Traverse();
     void inThreading(biThrNode<T> *ptr,biThrNode<T>* &pre); //中序线索化
     void inOrderTreading(); //中序线索化
-    void InOrderTraverse(int opt); //搜索指定结点的并求其前驱和后继
+    biThrNode<T>* InOrderTraverse(int opt); //搜索指定结点的并求其前驱和后继
     void getPreSucc(biThrNode<T> *targetNode);
 
 };
@@ -70,7 +70,7 @@ void biThrTree<T>::Traverse() {
 template <class T>
 void biThrTree<T>::preCreateBiTree(biThrNode<T>* &ptr) {
     char data;
-    if (!(cin>>data)) return;
+    if (!scanf("%c",&data)) return;
     if (data!='#'){
         ptr=new biThrNode<T>;
         ptr->data=data;
@@ -178,11 +178,14 @@ void print(biThrTree<Type> btt) {
 }
 
 template<class T>
-void biThrTree<T>::InOrderTraverse(int opt) {
+biThrNode<T>* biThrTree<T>::InOrderTraverse(int opt) {
     string inOrderseq;
     char target;
     biThrNode<T> *targetNode=NULL;
-    cin>>target;
+    if (opt==SEARCH) {
+        getchar();
+        scanf("%c",&target);
+    }
     biThrNode<T> *ptr=root->left;
     while (ptr!=root) {
         while (ptr->lTag==Link) ptr=ptr->left;
@@ -195,8 +198,14 @@ void biThrTree<T>::InOrderTraverse(int opt) {
         }
         ptr=ptr->right;
     }
-    cout<<inOrderseq<<endl;
+    if (opt==TRAVERSE)
+        cout<<inOrderseq<<endl;
+    return targetNode;
+}
 
+template <class T>
+void biThrTree<T>::getPreSucc(biThrNode<T>* targetNode) {
+    biThrNode<T> *ptr;
     if (!targetNode) cout<<"Not found"<<endl;
     else {
         if (targetNode->rTag==Thread) {
@@ -213,7 +222,7 @@ void biThrTree<T>::InOrderTraverse(int opt) {
         if (targetNode->lTag==Thread) {
             if (targetNode->left!=root)
                 cout<<"prev is "<<targetNode->left->data<<targetNode->left->lTag<<endl;
-            else cout<<"prev is NULL"<<endl;
+            else cout<<"pre is NULL"<<endl;
         }
         else {
             ptr=targetNode->left;
@@ -230,5 +239,7 @@ int main() {
     BTT.createBiTree();
     BTT.inOrderTreading();
     BTT.InOrderTraverse(TRAVERSE);
+    biThrNode<char> *targetNode=BTT.InOrderTraverse(SEARCH);
+    BTT.getPreSucc(targetNode);
     return 0;
 }
