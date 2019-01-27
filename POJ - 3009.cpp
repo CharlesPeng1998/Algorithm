@@ -41,13 +41,10 @@ int main() {
     if (w==0 && h==0) break;
     res=INF; steps=1;
     memset(board,0,sizeof(board)); //不对数组初始化必定WA，什么原理？
-<<<<<<< HEAD
     /*
     如果不对二维数组进行初始化操作，在指定区域外可能存在上次数据留下的
     “1”，导致程序第29行的错误判断
     */
-=======
->>>>>>> e2c844835504df17d4a762bae8e7f10ce3e6a41b
     for (int i=1;i<=h;i++) {
       for (int j=1;j<=w;j++) {
         cin>>board[i][j];
