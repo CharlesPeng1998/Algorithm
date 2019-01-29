@@ -1,5 +1,6 @@
 //这道题有必要写入博客
 //此为AC代码
+//这道题困扰了一些时间，需要回味
 #include <iostream>
 #include <string.h>
 #define INF 0x3f3f3f3f
@@ -31,7 +32,7 @@ void dfs(int i,int j) {
       steps++;
       dfs(pi-di[k],pj-dj[k]);
       steps--;
-      board[pi][pj]=1;
+      board[pi][pj]=1; //注意回溯到原状态
     }
   }
 }
