@@ -1,50 +1,58 @@
-#include <bits/stdc++.h>
+#include<stdio.h>
+#include<string.h>
+#include<algorithm>
 using namespace std;
 
-int n,k;
-int a[10001];
+#define maxn 100100
+#define LL long long
 
-int binarySearch(int x,int begin,int end){
-	int left=begin,right=end;
-	int mid;
-	while(left<=right){
-		mid=(left+right)/2;
-		if(a[mid]==x) return mid;
-		else if(x>a[mid]) left=mid+1;
-		else if(x<a[mid]) right=mid-1;
-	}
-	if(x>a[mid]) return mid;
-	else return mid-1;
+int n;
+LL a[maxn],k;
+
+bool deal(LL mid)
+{
+    LL sum=0;
+    for(int i=0;i<n;i++){
+        if(a[i]>mid){
+            sum+=(a[i]-mid)/k;
+            if((a[i]-mid)%k)
+                sum++;
+            if(sum>mid)
+                return false;
+        }
+    }
+    return true;
 }
 
-//a[begin:end]循环右移k位
-void shiftRight(int begin,int end,int k){
-	for(int i=0;i<k;i++){
-		int temp=a[end];
-		for(int i=end;i>begin;i--) a[i]=a[i-1];
-		a[begin]=temp;
-	}
-}
+int main()
+{
+    //freopen("in.txt","r",stdin);
+    while(scanf("%d",&n)!=EOF)
+    {
+        LL big=0,ans;
+        for(int i=0;i<n;i++){
+            scanf("%lld",&a[i]);
+            big=big>a[i]?big:a[i];
+        }
+        scanf("%lld",&k);
+        if(k==1){
+            printf("%lld\n",big);
+            continue;
+        }
 
- void merge(){
-	 int i=0;
-	 int j=k;
-	 while (i<j&&j<n){
-		 int p=binarySearch(a[i],j,n-1); //在a[j:n-1]中找a[i]的位置
-		 shiftRight(i,p,p-j+1);
-		 i+=p-j+2;
-		 j=p+1;
-	 }
- }
 
-int main(){
-	cin>>n>>k;
-	for(int i=0;i<n;i++) cin>>a[i];
-	merge();
-
-	for(int i=0;i<n;i++){
-		cout<<a[i]<<' ';
-	}
-	cout<<endl;
-	return 0;
+        LL left=1,right=big;
+        LL mid;
+        k--;
+        while(left<=right)
+        {
+            mid=(right-left)*0.5+left;
+            if(deal(mid))
+                right=mid-1,ans=mid;
+            else
+                left=mid+1;
+        }
+        printf("%lld\n",ans);
+    }
+    return 0;
 }
