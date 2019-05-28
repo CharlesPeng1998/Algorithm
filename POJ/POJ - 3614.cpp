@@ -28,7 +28,6 @@ bool compare_cow(Cow a, Cow b){
   return a.spf_min<b.spf_min;
 }
 
-
 int main(){
   cin>>C>>L;
   for(int i=0;i<C;i++) cin>>cow[i].spf_min>>cow[i].spf_max;
